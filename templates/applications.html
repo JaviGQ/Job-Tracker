@@ -1,0 +1,111 @@
+<html>
+<head>
+    <title>Applications - Job Tracker</title>
+</head>
+<body>
+    <h1>Applications</h1>
+    <a href="/">← Dashboard</a>
+
+    <!-- ADD / EDIT FORM SECTION  -->
+    {% if mode == 'add' or mode == 'edit' %}
+    <div>
+        <h2>{{ 'Edit Application' if mode == 'edit' else 'Add New Application' }}</h2>
+
+        <form method="POST" action="{{ '/applications/edit/' + selected_application.application_id|string if mode == 'edit' else '/applications/add' }}">
+
+            <label>Job:
+                <select name="job_id" required>
+                    <option value="">-- Select Job --</option>
+                    {% for job in jobs %}
+                    <option value="{{ job.job_id }}"
+                        {{ 'selected' if mode == 'edit' and selected_application.job_id == job.job_id else '' }}>
+                        {{ job.company_name }} — {{ job.job_title }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </label><br>
+
+            <label>Application Date:
+                <input type="date" name="application_date" required
+                       value="{{ selected_application.application_date if mode == 'edit' else '' }}">
+            </label><br>
+
+            <label>Status:
+                <select name="status">
+                    {% for s in ['Applied', 'Screening', 'Interview', 'Offer', 'Rejected', 'Withdrawn'] %}
+                    <option value="{{ s }}"
+                        {{ 'selected' if mode == 'edit' and selected_application.status == s else '' }}>
+                        {{ s }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </label><br>
+
+            <label>Resume Version:
+                <input type="text" name="resume_version" placeholder="e.g. v2, TechJobs"
+                       value="{{ selected_application.resume_version if mode == 'edit' else '' }}">
+            </label><br>
+
+            <label>Cover Letter Sent:
+                <input type="checkbox" name="cover_letter_sent" value="1"
+                       {{ 'checked' if mode == 'edit' and selected_application.cover_letter_sent else '' }}>
+            </label><br>
+
+            <label>Interview Notes:
+                <input type="text" name="interview_data"
+                       placeholder="e.g. Phone screen went well, Technical round scheduled"
+                       value="{{ selected_application.interview_str if mode == 'edit' else '' }}">
+            </label><br>
+
+            <button type="submit">{{ 'Update Application' if mode == 'edit' else 'Save Application' }}</button>
+            <a href="/applications">Cancel</a>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- APPLICATIONS LIST        -->
+    {% if mode == 'list' %}
+    <a href="/applications/add">+ Add New Application</a>
+    {% endif %}
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Company</th>
+                <th>Job Title</th>
+                <th>Date Applied</th>
+                <th>Status</th>
+                <th>Resume Version</th>
+                <th>Cover Letter</th>
+                <th>Interview Notes</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in applications %}
+            <tr>
+                <td>{{ app.company_name }}</td>
+                <td>{{ app.job_title }}</td>
+                <td>{{ app.application_date.strftime('%m/%d/%Y') if app.application_date else 'N/A' }}</td>
+                <td>{{ app.status }}</td>
+                <td>{{ app.resume_version or 'N/A' }}</td>
+                <td>{{ 'Yes' if app.cover_letter_sent else 'No' }}</td>
+                <td>{{ app.interview_notes or 'N/A' }}</td>
+                <td>
+                    <a href="/applications/edit/{{ app.application_id }}">Edit</a>
+
+                    <form action="/applications/delete/{{ app.application_id }}"
+                          method="POST" style="display:inline;">
+                        <button type="submit"
+                                onclick="return confirm('Delete this application?')">
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>

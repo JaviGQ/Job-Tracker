@@ -1,0 +1,120 @@
+<html>
+<head>
+    <title>Contacts - Job Tracker</title>
+</head>
+<body>
+    <h1>Contacts</h1>
+    <a href="/">← Dashboard</a>
+
+    <!-- ADD / EDIT FORM SECTION  -->
+    {% if mode == 'add' or mode == 'edit' %}
+    <div>
+        <h2>{{ 'Edit Contact' if mode == 'edit' else 'Add New Contact' }}</h2>
+
+        <form method="POST" action="{{ '/contacts/edit/' + selected_contact.contact_id|string if mode == 'edit' else '/contacts/add' }}">
+
+            <label>Company:
+                <select name="company_id" required>
+                    <option value="">-- Select Company --</option>
+                    {% for company in companies %}
+                    <option value="{{ company.company_id }}"
+                        {{ 'selected' if mode == 'edit' and selected_contact.company_id == company.company_id else '' }}>
+                        {{ company.company_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </label><br>
+
+            <label>Contact Name:
+                <input type="text" name="contact_name" required
+                       value="{{ selected_contact.contact_name if mode == 'edit' else '' }}">
+            </label><br>
+
+            <label>Title:
+                <input type="text" name="title"
+                       value="{{ selected_contact.title if mode == 'edit' else '' }}">
+            </label><br>
+
+            <label>Email:
+                <input type="email" name="email"
+                       value="{{ selected_contact.email if mode == 'edit' else '' }}">
+            </label><br>
+
+            <label>Phone:
+                <input type="tel" name="phone"
+                       value="{{ selected_contact.phone if mode == 'edit' else '' }}">
+            </label><br>
+
+            <label>LinkedIn URL:
+                <input type="text" name="linkedin_url"
+                       value="{{ selected_contact.linkedin_url if mode == 'edit' else '' }}">
+            </label><br>
+
+            <label>Notes:
+                <textarea name="notes">{{ selected_contact.notes if mode == 'edit' else '' }}</textarea>
+            </label><br>
+
+            <button type="submit">{{ 'Update Contact' if mode == 'edit' else 'Save Contact' }}</button>
+            <a href="/contacts">Cancel</a>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- CONTACTS LIST SECTION    -->
+    {% if mode == 'list' %}
+    <a href="/contacts/add">+ Add New Contact</a>
+    {% endif %}
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Company</th>
+                <th>Title</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>LinkedIn</th>
+                <th>Notes</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for contact in contacts %}
+            <tr>
+                <td>{{ contact.contact_name }}</td>
+                <td>{{ contact.company_name }}</td>
+                <td>{{ contact.title or 'N/A' }}</td>
+                <td>
+                    {% if contact.email %}
+                        <a href="mailto:{{ contact.email }}">{{ contact.email }}</a>
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>{{ contact.phone or 'N/A' }}</td>
+                <td>
+                    {% if contact.linkedin_url %}
+                        <a href="{{ contact.linkedin_url }}" target="_blank">View</a>
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>{{ contact.notes or 'N/A' }}</td>
+                <td>
+                    <a href="/contacts/edit/{{ contact.contact_id }}">Edit</a>
+
+                    <form action="/contacts/delete/{{ contact.contact_id }}"
+                          method="POST" style="display:inline;">
+                        <button type="submit"
+                                onclick="return confirm('Delete this contact?')">
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>

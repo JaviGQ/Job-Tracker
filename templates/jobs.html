@@ -1,0 +1,123 @@
+<html>
+<head>
+    <title>Jobs - Job Tracker</title>
+</head>
+<body>
+    <h1>Jobs</h1>
+    <a href="/">← Dashboard</a>
+
+    <!-- ADD / EDIT FORM SECTION  -->
+    {% if mode == 'add' or mode == 'edit' %}
+    <div>
+        <h2>{{ 'Edit Job' if mode == 'edit' else 'Add New Job' }}</h2>
+
+        <form method="POST" action="{{ '/jobs/edit/' + selected_job.job_id|string if mode == 'edit' else '/jobs/add' }}">
+            
+            <label>Company:
+                <select name="company_id" required>
+                    <option value="">-- Select Company --</option>
+                    {% for company in companies %}
+                    <option value="{{ company.company_id }}"
+                        {{ 'selected' if mode == 'edit' and selected_job.company_id == company.company_id else '' }}>
+                        {{ company.company_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </label><br>
+
+            <label>Job Title:
+                <input type="text" name="job_title" required
+                       value="{{ selected_job.job_title if mode == 'edit' else '' }}">
+            </label><br>
+
+            <label>Job Type:
+                <select name="job_type">
+                    {% for jtype in ['Full-time', 'Part-time', 'Contract', 'Internship'] %}
+                    <option value="{{ jtype }}"
+                        {{ 'selected' if mode == 'edit' and selected_job.job_type == jtype else '' }}>
+                        {{ jtype }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </label><br>
+
+            <label>Salary Min:
+                <input type="number" name="salary_min"
+                       value="{{ selected_job.salary_min if mode == 'edit' else '' }}">
+            </label><br>
+
+            <label>Salary Max:
+                <input type="number" name="salary_max"
+                       value="{{ selected_job.salary_max if mode == 'edit' else '' }}">
+            </label><br>
+
+            <label>Job URL:
+                <input type="text" name="job_url"
+                       value="{{ selected_job.job_url if mode == 'edit' else '' }}">
+            </label><br>
+
+            <label>Date Posted:
+                <input type="date" name="date_posted"
+                       value="{{ selected_job.date_posted if mode == 'edit' else '' }}">
+            </label><br>
+
+            <label>Requirements (comma-separated):
+                <input type="text" name="requirements" 
+                       placeholder="e.g. Python, SQL, Flask"
+                       value="{{ selected_job.requirements_str if mode == 'edit' else '' }}">
+            </label><br>
+
+            <button type="submit">{{ 'Update Job' if mode == 'edit' else 'Save Job' }}</button>
+            <a href="/jobs">Cancel</a>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- JOBS LIST SECTION        -->
+    {% if mode == 'list' %}
+    <a href="/jobs/add">+ Add New Job</a>
+    {% endif %}
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Job Title</th>
+                <th>Company</th>
+                <th>Type</th>
+                <th>Salary Range</th>
+                <th>Date Posted</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for job in jobs %}
+            <tr>
+                <td>{{ job.job_title }}</td>
+                <td>{{ job.company_name }}</td>
+                <td>{{ job.job_type }}</td>
+                <td>
+                    {% if job.salary_min and job.salary_max %}
+                        ${{ "{:,}".format(job.salary_min) }} - ${{ "{:,}".format(job.salary_max) }}
+                    {% else %}
+                        Not specified
+                    {% endif %}
+                </td>
+                <td>{{ job.date_posted.strftime('%m/%d/%Y') if job.date_posted else 'N/A' }}</td>
+                <td>
+                    <a href="/jobs/edit/{{ job.job_id }}">Edit</a>
+
+                    <form action="/jobs/delete/{{ job.job_id }}" 
+                          method="POST" style="display:inline;">
+                        <button type="submit"
+                                onclick="return confirm('Delete this job?')">
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>
