@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Companies - Job Tracker</title>
+</head>
+<body>
+    <h1>Companies</h1>
+    <a href="/">← Dashboard</a>
+
+    <!-- ======================== -->
+    <!-- ADD / EDIT FORM SECTION  -->
+    <!-- ======================== -->
+    {% if mode == 'add' or mode == 'edit' %}
+    <div>
+        <h2>{{ 'Edit Company' if mode == 'edit' else 'Add New Company' }}</h2>
+
+        <form method="POST" action="{{ '/companies/edit/' + selected_company.company_id|string if mode == 'edit' else '/companies/add' }}">
+            <label>Company Name:
+                <input type="text" name="company_name" required
+                       value="{{ selected_company.company_name if mode == 'edit' else '' }}">
+            </label><br>
+
+            <label>Industry:
+                <input type="text" name="industry"
+                       value="{{ selected_company.industry if mode == 'edit' else '' }}">
+            </label><br>
+
+            <label>Website:
+                <input type="text" name="website"
+                       value="{{ selected_company.website if mode == 'edit' else '' }}">
+            </label><br>
+
+            <label>City:
+                <input type="text" name="city"
+                       value="{{ selected_company.city if mode == 'edit' else '' }}">
+            </label><br>
+
+            <label>State:
+                <input type="text" name="state"
+                       value="{{ selected_company.state if mode == 'edit' else '' }}">
+            </label><br>
+
+            <label>Notes:
+                <textarea name="notes">{{ selected_company.notes if mode == 'edit' else '' }}</textarea>
+            </label><br>
+
+            <button type="submit">{{ 'Update Company' if mode == 'edit' else 'Save Company' }}</button>
+            <a href="/companies">Cancel</a>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- ======================== -->
+    <!-- COMPANIES LIST SECTION   -->
+    <!-- ======================== -->
+    {% if mode == 'list' %}
+    <a href="/companies/add">+ Add New Company</a>
+    {% endif %}
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Company</th>
+                <th>Industry</th>
+                <th>City</th>
+                <th>State</th>
+                <th>Website</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for company in companies %}
+            <tr>
+                <td>{{ company.company_name }}</td>
+                <td>{{ company.industry }}</td>
+                <td>{{ company.city }}</td>
+                <td>{{ company.state }}</td>
+                <td>{{ company.website }}</td>
+                <td>
+                    <a href="/companies/edit/{{ company.company_id }}">Edit</a>
+                    
+                    <form action="/companies/delete/{{ company.company_id }}" 
+                          method="POST" style="display:inline;">
+                        <button type="submit"
+                                onclick="return confirm('Delete this company?')">
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>
