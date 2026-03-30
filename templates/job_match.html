@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Job Match - Job Tracker{% endblock %}
+{% block content %}
+
+    <h1>Job Match</h1>
+    <p>Enter your skills to see how well you match available jobs.</p>
+
+    <!-- ======================== -->
+    <!-- SKILLS INPUT FORM        -->
+    <!-- ======================== -->
+    <form method="POST">
+        <label>Your Skills (comma-separated):
+            <input type="text" 
+                   name="skills" 
+                   placeholder="e.g. Python, SQL, Flask"
+                   value="{{ user_skills_input }}"
+                   style="width: 400px;">
+        </label>
+        <button type="submit">Find Matches</button>
+    </form>
+
+    <!-- ======================== -->
+    <!-- MATCH RESULTS            -->
+    <!-- ======================== -->
+    {% if matched_jobs %}
+        <h2>Results — {{ matched_jobs|length }} job(s) found</h2>
+
+        {% for job in matched_jobs %}
+        <div class="match-card">
+            <h3>
+                {% if job.job_url %}
+                    <a href="{{ job.job_url }}" target="_blank">{{ job.job_title }}</a>
+                {% else %}
+                    {{ job.job_title }}
+                {% endif %}
+                at {{ job.company_name }}
+            </h3>
+
+            <!-- Match percentage bar -->
+            <p><strong>Match: {{ job.match_percent }}%</strong>
+               ({{ job.matching_skills|length }}/{{ job.total_required }} skills)</p>
+            
+            <div class="progress-bar-container">
+                <div class="progress-bar" style="width: {{ job.match_percent }}%;">
+                    {{ job.match_percent }}%
+                </div>
+            </div>
+
+            <!-- Matching skills -->
+            {% if job.matching_skills %}
+            <p>✅ <strong>Matching:</strong> 
+                {% for skill in job.matching_skills %}
+                    <span class="skill-tag match">{{ skill }}</span>
+                {% endfor %}
+            </p>
+            {% endif %}
+
+            <!-- Missing skills -->
+            {% if job.missing_skills %}
+            <p>❌ <strong>Missing:</strong>
+                {% for skill in job.missing_skills %}
+                    <span class="skill-tag missing">{{ skill }}</span>
+                {% endfor %}
+            </p>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+    {% elif request.method == 'POST' %}
+        <p>No jobs found with matching requirements. Try different skills or add requirements to your jobs.</p>
+    {% endif %}
+
+{% endblock %}

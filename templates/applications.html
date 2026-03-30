@@ -1,64 +1,82 @@
-<html>
-<head>
-    <title>Applications - Job Tracker</title>
-</head>
+{% extends 'base.html' %}
+{% block title %}Applications - Job Tracker{% endblock %}
+{% block content %}
+
 <body>
-    <h1>Applications</h1>
-    <a href="/">← Dashboard</a>
+    <div class="page-header">
+        <h1>Applications</h1>
+        {% if mode == 'list' %}
+        <a href="/applications/add" class="btn btn-primary">+ Add Application</a>
+        {% endif %}
+    </div>
 
     <!-- ADD / EDIT FORM SECTION  -->
     {% if mode == 'add' or mode == 'edit' %}
-    <div>
-        <h2>{{ 'Edit Application' if mode == 'edit' else 'Add New Application' }}</h2>
-
+    <div class="form-card">
         <form method="POST" action="{{ '/applications/edit/' + selected_application.application_id|string if mode == 'edit' else '/applications/add' }}">
 
-            <label>Job:
-                <select name="job_id" required>
-                    <option value="">-- Select Job --</option>
-                    {% for job in jobs %}
-                    <option value="{{ job.job_id }}"
-                        {{ 'selected' if mode == 'edit' and selected_application.job_id == job.job_id else '' }}>
-                        {{ job.company_name }} — {{ job.job_title }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </label><br>
+            <div class="form-group">
+                <label>Job:
+                    <select name="job_id" required>
+                        <option value="">-- Select Job --</option>
+                        {% for job in jobs %}
+                        <option value="{{ job.job_id }}"
+                            {{ 'selected' if mode == 'edit' and selected_application.job_id == job.job_id else '' }}>
+                            {{ job.company_name }} — {{ job.job_title }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </label><br>
+            </div>
 
-            <label>Application Date:
-                <input type="date" name="application_date" required
-                       value="{{ selected_application.application_date if mode == 'edit' else '' }}">
-            </label><br>
+            <div class="form-group">
+                <label>Application Date:
+                    <input type="date" name="application_date" required
+                        value="{{ selected_application.application_date if mode == 'edit' else '' }}">
+                </label><br>
+            </div>
 
-            <label>Status:
-                <select name="status">
-                    {% for s in ['Applied', 'Screening', 'Interview', 'Offer', 'Rejected', 'Withdrawn'] %}
-                    <option value="{{ s }}"
-                        {{ 'selected' if mode == 'edit' and selected_application.status == s else '' }}>
-                        {{ s }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </label><br>
+            <div class="form-group">
+                <label>Status:
+                    <select name="status">
+                        {% for s in ['Applied', 'Screening', 'Interview', 'Offer', 'Rejected', 'Withdrawn'] %}
+                        <option value="{{ s }}"
+                            {{ 'selected' if mode == 'edit' and selected_application.status == s else '' }}>
+                            {{ s }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </label><br>
+            </div>
 
-            <label>Resume Version:
-                <input type="text" name="resume_version" placeholder="e.g. v2, TechJobs"
-                       value="{{ selected_application.resume_version if mode == 'edit' else '' }}">
-            </label><br>
+            <div class="form-group">
+                <label>Resume Version:
+                    <input type="text" name="resume_version" placeholder="e.g. v2, TechJobs"
+                        value="{{ selected_application.resume_version if mode == 'edit' else '' }}">
+                </label><br>
+            </div>
 
-            <label>Cover Letter Sent:
-                <input type="checkbox" name="cover_letter_sent" value="1"
-                       {{ 'checked' if mode == 'edit' and selected_application.cover_letter_sent else '' }}>
-            </label><br>
+            <div class="form-group">
+                <label>Cover Letter Sent:
+                    <input type="checkbox" name="cover_letter_sent" value="1"
+                        {{ 'checked' if mode == 'edit' and selected_application.cover_letter_sent else '' }}>
+                </label><br>
+            </div>
 
-            <label>Interview Notes:
-                <input type="text" name="interview_data"
-                       placeholder="e.g. Phone screen went well, Technical round scheduled"
-                       value="{{ selected_application.interview_str if mode == 'edit' else '' }}">
-            </label><br>
+            <div class="form-group">
+                <label>Interview Notes:
+                    <input type="text" name="interview_data"
+                        placeholder="e.g. Phone screen went well, Technical round scheduled"
+                        value="{{ selected_application.interview_str if mode == 'edit' else '' }}">
+                </label><br>
+            </div>
 
-            <button type="submit">{{ 'Update Application' if mode == 'edit' else 'Save Application' }}</button>
-            <a href="/applications">Cancel</a>
+            <div class="form-actions">
+                <button type="submit">
+                    {{ 'Update Application' if mode == 'edit' else 'Save Application' }}
+                </button>
+                <a href="/applications" class="btn btn-secondary">Cancel</a>
+            </div>
         </form>
     </div>
     {% endif %}
@@ -87,16 +105,20 @@
                 <td>{{ app.company_name }}</td>
                 <td>{{ app.job_title }}</td>
                 <td>{{ app.application_date.strftime('%m/%d/%Y') if app.application_date else 'N/A' }}</td>
-                <td>{{ app.status }}</td>
+                <td>
+                    <span class="badge badge-{{ app.status | lower }}">
+                        {{ app.status }}
+                    </span>
+                </td>
                 <td>{{ app.resume_version or 'N/A' }}</td>
                 <td>{{ 'Yes' if app.cover_letter_sent else 'No' }}</td>
                 <td>{{ app.interview_notes or 'N/A' }}</td>
-                <td>
-                    <a href="/applications/edit/{{ app.application_id }}">Edit</a>
+                <td style="white-space: nowrap;">
+                    <a href="/applications/edit/{{ app.application_id }}" class="btn btn-primary">Edit</a>
 
-                    <form action="/applications/delete/{{ app.application_id }}"
+                    <form action="/applications/delete/{{ app.application_id }}" 
                           method="POST" style="display:inline;">
-                        <button type="submit"
+                        <button type="submit" class="btn btn-danger"
                                 onclick="return confirm('Delete this application?')">
                             Delete
                         </button>
@@ -109,3 +131,5 @@
 
 </body>
 </html>
+
+{% endblock %}

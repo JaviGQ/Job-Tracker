@@ -9,13 +9,51 @@ app = Flask(__name__)
 def dashboard():
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
-    
-    # Get counts from each table for the dashboard
+
+    # Total counts from each table
     cursor.execute("SELECT COUNT(*) as count FROM applications")
-    app_count = cursor.fetchone()
-    
+    total_applications = cursor.fetchone()['count']
+
+    cursor.execute("SELECT COUNT(*) as count FROM companies")
+    total_companies = cursor.fetchone()['count']
+
+    cursor.execute("SELECT COUNT(*) as count FROM jobs")
+    total_jobs = cursor.fetchone()['count']
+
+    cursor.execute("SELECT COUNT(*) as count FROM contacts")
+    total_contacts = cursor.fetchone()['count']
+
+    # Applications broken down by status
+    cursor.execute("""
+        SELECT status, COUNT(*) as count 
+        FROM applications 
+        GROUP BY status
+        ORDER BY count DESC
+    """)
+    status_breakdown = cursor.fetchall()
+
+    # 5 most recent applications
+    cursor.execute("""
+        SELECT applications.*, jobs.job_title, companies.company_name
+        FROM applications
+        JOIN jobs ON applications.job_id = jobs.job_id
+        JOIN companies ON jobs.company_id = companies.company_id
+        ORDER BY applications.application_date DESC
+        LIMIT 5
+    """)
+    recent_applications = cursor.fetchall()
+
     conn.close()
-    return render_template('dashboard.html', app_count=app_count)
+    print("Total applications:", total_applications)
+    print("Status breakdown:", status_breakdown)
+    print("Recent applications:", recent_applications)
+    return render_template('dashboard.html',
+                           total_applications=total_applications,
+                           total_companies=total_companies,
+                           total_jobs=total_jobs,
+                           total_contacts=total_contacts,
+                           status_breakdown=status_breakdown,
+                           recent_applications=recent_applications)
 
 # Companies page (Read)
 @app.route('/companies')
@@ -113,7 +151,6 @@ def jobs():
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
     
-    # JOIN lets us show company_name instead of just company_id
     cursor.execute("""
         SELECT jobs.*, companies.company_name 
         FROM jobs 
@@ -122,14 +159,22 @@ def jobs():
     """)
     jobs = cursor.fetchall()
     
-    cursor.execute("SELECT company_id, company_name FROM companies ORDER BY company_name")
-    companies = cursor.fetchall()
+    for job in jobs:
+        if job['requirements']:
+            reqs = json.loads(job['requirements'])
+            job['requirements'] = ', '.join(reqs)
+        else:
+            job['requirements'] = 'None'
+
+    cursor2 = conn.cursor(dictionary=True)
+    cursor2.execute("SELECT company_id, company_name FROM companies ORDER BY company_name")
+    companies = cursor2.fetchall()
     
     conn.close()
-    return render_template('jobs.html', 
-                           jobs=jobs, 
+    return render_template('jobs.html',
+                           jobs=jobs,
                            companies=companies,
-                           mode='list', 
+                           mode='list',
                            selected_job=None)
 
 # Jobs Page (Create)
@@ -146,36 +191,44 @@ def add_job():
         salary_max = request.form['salary_max'] or None
         job_url = request.form['job_url']
         date_posted = request.form['date_posted'] or None
-
-        # For JSON
         requirements = request.form['requirements']
         requirements_json = json.dumps([r.strip() for r in requirements.split(',') if r.strip()])
 
         cursor.execute("""
-            INSERT INTO jobs (company_id, job_title, job_type, salary_min, 
+            INSERT INTO jobs (company_id, job_title, job_type, salary_min,
                             salary_max, job_url, date_posted, requirements)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        """, (company_id, job_title, job_type, salary_min, 
+        """, (company_id, job_title, job_type, salary_min,
               salary_max, job_url, date_posted, requirements_json))
         conn.commit()
         conn.close()
         return redirect('/jobs')
 
-    cursor.execute("SELECT company_id, company_name FROM companies ORDER BY company_name")
-    companies = cursor.fetchall()
-    
-    cursor.execute("""
-        SELECT jobs.*, companies.company_name 
-        FROM jobs 
+    cursor2 = conn.cursor(dictionary=True)
+    cursor2.execute("""
+        SELECT jobs.*, companies.company_name
+        FROM jobs
         JOIN companies ON jobs.company_id = companies.company_id
         ORDER BY jobs.job_title
     """)
-    jobs = cursor.fetchall()
+    jobs = cursor2.fetchall()
+
+    for job in jobs:
+        if job['requirements']:
+            reqs = json.loads(job['requirements'])
+            job['requirements'] = ', '.join(reqs)
+        else:
+            job['requirements'] = 'None'
+
+    cursor3 = conn.cursor(dictionary=True)
+    cursor3.execute("SELECT company_id, company_name FROM companies ORDER BY company_name")
+    companies = cursor3.fetchall()
+
     conn.close()
-    return render_template('jobs.html', 
-                           jobs=jobs, 
+    return render_template('jobs.html',
+                           jobs=jobs,
                            companies=companies,
-                           mode='add', 
+                           mode='add',
                            selected_job=None)
 
 # Jobs Page (Update)
@@ -208,28 +261,38 @@ def edit_job(job_id):
 
     cursor.execute("SELECT * FROM jobs WHERE job_id=%s", (job_id,))
     selected_job = cursor.fetchone()
-    
+
     if selected_job['requirements']:
         reqs = json.loads(selected_job['requirements'])
         selected_job['requirements_str'] = ', '.join(reqs)
     else:
         selected_job['requirements_str'] = ''
 
-    cursor.execute("SELECT company_id, company_name FROM companies ORDER BY company_name")
-    companies = cursor.fetchall()
-
-    cursor.execute("""
+    cursor2 = conn.cursor(dictionary=True)
+    cursor2.execute("""
         SELECT jobs.*, companies.company_name 
         FROM jobs 
         JOIN companies ON jobs.company_id = companies.company_id
         ORDER BY jobs.job_title
     """)
-    jobs = cursor.fetchall()
+    jobs = cursor2.fetchall()
+
+    for job in jobs:
+        if job['requirements']:
+            reqs = json.loads(job['requirements'])
+            job['requirements'] = ', '.join(reqs)
+        else:
+            job['requirements'] = 'None'
+
+    cursor3 = conn.cursor(dictionary=True)
+    cursor3.execute("SELECT company_id, company_name FROM companies ORDER BY company_name")
+    companies = cursor3.fetchall()
+
     conn.close()
-    return render_template('jobs.html', 
-                           jobs=jobs, 
+    return render_template('jobs.html',
+                           jobs=jobs,
                            companies=companies,
-                           mode='edit', 
+                           mode='edit',
                            selected_job=selected_job)
 
 # Jobs Page (Delete)
@@ -534,6 +597,63 @@ def delete_contact(contact_id):
     conn.commit()
     conn.close()
     return redirect('/contacts')
+
+# Job Match Page
+@app.route('/job_match', methods=['GET', 'POST'])
+def job_match():
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+    
+    matched_jobs = []
+    user_skills = []
+    user_skills_input = ''
+
+    if request.method == 'POST':
+        # Get user skills from form and clean them up
+        user_skills_input = request.form['skills']
+        user_skills = [s.strip().lower() for s in user_skills_input.split(',') if s.strip()]
+
+        # Fetch all jobs that have requirements defined
+        cursor.execute("""
+            SELECT jobs.*, companies.company_name
+            FROM jobs
+            JOIN companies ON jobs.company_id = companies.company_id
+            WHERE jobs.requirements IS NOT NULL
+        """)
+        all_jobs = cursor.fetchall()
+
+        for job in all_jobs:
+            # Parse the JSON requirements array
+            requirements = json.loads(job['requirements'])
+            requirements_lower = [r.lower() for r in requirements]
+
+            if len(requirements_lower) == 0:
+                continue
+
+            # Find which skills match
+            matching = [s for s in user_skills if s in requirements_lower]
+            missing = [r for r in requirements_lower if r not in user_skills]
+
+            # Calculate match percentage
+            match_percent = round((len(matching) / len(requirements_lower)) * 100)
+
+            matched_jobs.append({
+                'job_title': job['job_title'],
+                'company_name': job['company_name'],
+                'match_percent': match_percent,
+                'matching_skills': matching,
+                'missing_skills': missing,
+                'total_required': len(requirements_lower),
+                'job_url': job['job_url']
+            })
+
+        # Sort by match percentage, highest first
+        matched_jobs.sort(key=lambda x: x['match_percent'], reverse=True)
+
+    conn.close()
+    return render_template('job_match.html',
+                           matched_jobs=matched_jobs,
+                           user_skills_input=user_skills_input)
 
 if __name__ == '__main__':
     app.run(debug=True)

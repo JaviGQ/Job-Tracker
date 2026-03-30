@@ -1,69 +1,86 @@
-<html>
-<head>
-    <title>Contacts - Job Tracker</title>
-</head>
+{% extends 'base.html' %}
+{% block title %}Contacts - Job Tracker{% endblock %}
+{% block content %}
+
 <body>
-    <h1>Contacts</h1>
-    <a href="/">← Dashboard</a>
+    <div class="page-header">
+        <h1>Contacts</h1>
+        {% if mode == 'list' %}
+        <a href="/contacts/add" class="btn btn-primary">+ Add Contact</a>
+        {% endif %}
+    </div>
 
     <!-- ADD / EDIT FORM SECTION  -->
     {% if mode == 'add' or mode == 'edit' %}
-    <div>
-        <h2>{{ 'Edit Contact' if mode == 'edit' else 'Add New Contact' }}</h2>
-
+    <div class="form-card">
         <form method="POST" action="{{ '/contacts/edit/' + selected_contact.contact_id|string if mode == 'edit' else '/contacts/add' }}">
 
-            <label>Company:
-                <select name="company_id" required>
-                    <option value="">-- Select Company --</option>
-                    {% for company in companies %}
-                    <option value="{{ company.company_id }}"
-                        {{ 'selected' if mode == 'edit' and selected_contact.company_id == company.company_id else '' }}>
-                        {{ company.company_name }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </label><br>
+            <div class="form-group">
+                <label>Company:
+                    <select name="company_id" required>
+                        <option value="">-- Select Company --</option>
+                        {% for company in companies %}
+                        <option value="{{ company.company_id }}"
+                            {{ 'selected' if mode == 'edit' and selected_contact.company_id == company.company_id else '' }}>
+                            {{ company.company_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </label><br>
+            </div>
 
-            <label>Contact Name:
-                <input type="text" name="contact_name" required
-                       value="{{ selected_contact.contact_name if mode == 'edit' else '' }}">
-            </label><br>
+            <div class="form-group">
+                <label>Contact Name:
+                    <input type="text" name="contact_name" required
+                        value="{{ selected_contact.contact_name if mode == 'edit' else '' }}">
+                </label><br>
+            </div>
 
-            <label>Title:
-                <input type="text" name="title"
-                       value="{{ selected_contact.title if mode == 'edit' else '' }}">
-            </label><br>
+            <div class="form-group">
+                <label>Title:
+                    <input type="text" name="title"
+                        value="{{ selected_contact.title if mode == 'edit' else '' }}">
+                </label><br>
+            </div>
 
-            <label>Email:
-                <input type="email" name="email"
-                       value="{{ selected_contact.email if mode == 'edit' else '' }}">
-            </label><br>
+            <div class="form-group">
+                <label>Email:
+                    <input type="email" name="email"
+                        value="{{ selected_contact.email if mode == 'edit' else '' }}">
+                </label><br>
+            </div>
 
-            <label>Phone:
-                <input type="tel" name="phone"
-                       value="{{ selected_contact.phone if mode == 'edit' else '' }}">
-            </label><br>
+            <div class="form-group">
+                <label>Phone:
+                    <input type="tel" name="phone"
+                        value="{{ selected_contact.phone if mode == 'edit' else '' }}">
+                </label><br>
+            </div>
 
-            <label>LinkedIn URL:
-                <input type="text" name="linkedin_url"
-                       value="{{ selected_contact.linkedin_url if mode == 'edit' else '' }}">
-            </label><br>
+            <div class="form-group">
+                <label>LinkedIn URL:
+                    <input type="text" name="linkedin_url"
+                        value="{{ selected_contact.linkedin_url if mode == 'edit' else '' }}">
+                </label><br>
+            </div>
 
-            <label>Notes:
-                <textarea name="notes">{{ selected_contact.notes if mode == 'edit' else '' }}</textarea>
-            </label><br>
+            <div class="form-group">
+                <label>Notes:
+                    <textarea name="notes">{{ selected_contact.notes if mode == 'edit' else '' }}</textarea>
+                </label><br>
+            </div>
 
-            <button type="submit">{{ 'Update Contact' if mode == 'edit' else 'Save Contact' }}</button>
-            <a href="/contacts">Cancel</a>
+            <div class="form-actions">
+            <button type="submit">
+                {{ 'Update Contact' if mode == 'edit' else 'Save Contact' }}
+            </button>
+            <a href="/contacts" class="btn btn-secondary">Cancel</a>
+            </div>
         </form>
     </div>
     {% endif %}
 
     <!-- CONTACTS LIST SECTION    -->
-    {% if mode == 'list' %}
-    <a href="/contacts/add">+ Add New Contact</a>
-    {% endif %}
 
     <table border="1">
         <thead>
@@ -100,12 +117,12 @@
                     {% endif %}
                 </td>
                 <td>{{ contact.notes or 'N/A' }}</td>
-                <td>
-                    <a href="/contacts/edit/{{ contact.contact_id }}">Edit</a>
+                <td style="white-space: nowrap;">
+                    <a href="/contacts/edit/{{ contact.contact_id }}" class="btn btn-primary">Edit</a>
 
-                    <form action="/contacts/delete/{{ contact.contact_id }}"
+                    <form action="/contacts/delete/{{ contact.contact_id }}" 
                           method="POST" style="display:inline;">
-                        <button type="submit"
+                        <button type="submit" class="btn btn-danger"
                                 onclick="return confirm('Delete this contact?')">
                             Delete
                         </button>
@@ -118,3 +135,5 @@
 
 </body>
 </html>
+
+{% endblock %}

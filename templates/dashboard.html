@@ -1,9 +1,87 @@
-<html>
-<head>
-    <title>Job Tracker</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% block title %}Dashboard - Job Tracker{% endblock %}
+{% block content %}
+
+<div class="page-header">
     <h1>Job Application Tracker</h1>
-    <p>Total Applications: {{ app_count.count }}</p>
-</body>
-</html>
+</div>
+
+<!-- Stat Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>Applications</h3>
+        <p>{{ total_applications }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>Companies</h3>
+        <p>{{ total_companies }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>Jobs</h3>
+        <p>{{ total_jobs }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>Contacts</h3>
+        <p>{{ total_contacts }}</p>
+    </div>
+</div>
+
+<!-- Status Breakdown -->
+<h2>Applications by Status</h2>
+{% if status_breakdown %}
+<table>
+    <thead>
+        <tr>
+            <th>Status</th>
+            <th>Count</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in status_breakdown %}
+        <tr>
+            <td>
+                <span class="badge badge-{{ row.status | lower }}">
+                    {{ row.status }}
+                </span>
+            </td>
+            <td>{{ row.count }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="empty-message">No applications yet.</div>
+{% endif %}
+
+<!-- Recent Applications -->
+<h2 class="mt-20">Recent Applications</h2>
+{% if recent_applications %}
+<table>
+    <thead>
+        <tr>
+            <th>Company</th>
+            <th>Job Title</th>
+            <th>Date Applied</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for app in recent_applications %}
+        <tr>
+            <td>{{ app.company_name }}</td>
+            <td>{{ app.job_title }}</td>
+            <td>{{ app.application_date.strftime('%m/%d/%Y') if app.application_date else 'N/A' }}</td>
+            <td>
+                <span class="badge badge-{{ app.status | lower }}">
+                    {{ app.status }}
+                </span>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="empty-message">No applications yet.</div>
+{% endif %}
+
+{% endblock %}
