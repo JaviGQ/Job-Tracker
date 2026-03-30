@@ -5,23 +5,48 @@
     <h1>Job Match</h1>
     <p>Enter your skills to see how well you match available jobs.</p>
 
-    <!-- ======================== -->
     <!-- SKILLS INPUT FORM        -->
-    <!-- ======================== -->
-    <form method="POST">
-        <label>Your Skills (comma-separated):
-            <input type="text" 
-                   name="skills" 
-                   placeholder="e.g. Python, SQL, Flask"
-                   value="{{ user_skills_input }}"
-                   style="width: 400px;">
-        </label>
-        <button type="submit">Find Matches</button>
-    </form>
+    <div class="form-card">
+        <form method="POST" id="skillsForm">
+            <div class="form-group">
+                <label>Your Skills</label>
 
-    <!-- ======================== -->
+                <!-- Bubble container + text input together -->
+                <div class="skills-input-container" id="skillsContainer">
+                    <!-- Text input always stays on top -->
+                    <input type="text"
+                        id="skillInput"
+                        placeholder="Type a skill and press comma or Enter..."
+                        autocomplete="off">
+
+                    <!-- Bubbles appear below in their own row -->
+                    <div class="skills-bubbles-row" id="bubblesRow">
+                        {% if user_skills_input %}
+                            {% for skill in user_skills_input.split(',') %}
+                                {% if skill.strip() %}
+                                <div class="skill-bubble">
+                                    {{ skill.strip() }}
+                                    <span class="remove-skill" onclick="removeSkill(this)">×</span>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Hidden input that Flask actually reads -->
+                <input type="hidden" name="skills" id="skillsHidden" 
+                    value="{{ user_skills_input }}">
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Find Matches</button>
+                <button type="button" class="btn btn-secondary" onclick="clearSkills()">Clear</button>
+            </div>
+        </form>
+    </div>
+
     <!-- MATCH RESULTS            -->
-    <!-- ======================== -->
     {% if matched_jobs %}
         <h2>Results — {{ matched_jobs|length }} job(s) found</h2>
 
@@ -69,5 +94,74 @@
     {% elif request.method == 'POST' %}
         <p>No jobs found with matching requirements. Try different skills or add requirements to your jobs.</p>
     {% endif %}
+
+<script>
+    function updateHiddenInput() {
+        const bubbles = document.querySelectorAll('.skill-bubble');
+        const skills = [];
+        bubbles.forEach(bubble => {
+            // Get text content without the × button text
+            const text = bubble.childNodes[0].textContent.trim();
+            if (text) skills.push(text);
+        });
+        document.getElementById('skillsHidden').value = skills.join(',');
+    }
+
+    function addSkill(skill) {
+        skill = skill.trim();
+        if (!skill) return;
+
+        // Check for duplicates
+        const existing = document.querySelectorAll('.skill-bubble');
+        for (let bubble of existing) {
+            if (bubble.childNodes[0].textContent.trim().toLowerCase() === skill.toLowerCase()) {
+                return;
+            }
+        }
+
+        // Build the bubble element
+        const bubble = document.createElement('div');
+        bubble.className = 'skill-bubble';
+        bubble.innerHTML = skill + '<span class="remove-skill" onclick="removeSkill(this)">×</span>';
+
+        // Append to the bubbles row instead of inserting before input
+        document.getElementById('bubblesRow').appendChild(bubble);
+
+        updateHiddenInput();
+    }
+
+    function removeSkill(el) {
+        el.parentNode.remove();
+        updateHiddenInput();
+    }
+
+    function clearSkills() {
+        const bubbles = document.querySelectorAll('.skill-bubble');
+        bubbles.forEach(b => b.remove());
+        document.getElementById('skillsHidden').value = '';
+        document.getElementById('skillInput').value = '';
+    }
+
+    document.getElementById('skillInput').addEventListener('keydown', function(e) {
+        if (e.key === ',' || e.key === 'Enter') {
+            e.preventDefault();
+            const val = this.value.replace(',', '').trim();
+            if (val) {
+                addSkill(val);
+                this.value = '';
+            }
+        }
+    });
+
+    document.getElementById('skillInput').addEventListener('paste', function(e) {
+        e.preventDefault();
+        const pasted = (e.clipboardData || window.clipboardData).getData('text');
+        const skills = pasted.split(',');
+        skills.forEach(s => {
+            if (s.trim()) addSkill(s.trim());
+        });
+        this.value = '';
+    });
+</script>
 
 {% endblock %}

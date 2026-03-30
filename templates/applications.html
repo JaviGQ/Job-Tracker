@@ -5,10 +5,11 @@
 <body>
     <div class="page-header">
         <h1>Applications</h1>
-        {% if mode == 'list' %}
-        <a href="/applications/add" class="btn btn-primary">+ Add Application</a>
-        {% endif %}
     </div>
+
+    {% if mode == 'list' %}
+    <a href="/applications/add" class="btn btn-primary">+ Add Application</a>
+    {% endif %}
 
     <!-- ADD / EDIT FORM SECTION  -->
     {% if mode == 'add' or mode == 'edit' %}
@@ -79,11 +80,6 @@
             </div>
         </form>
     </div>
-    {% endif %}
-
-    <!-- APPLICATIONS LIST        -->
-    {% if mode == 'list' %}
-    <a href="/applications/add">+ Add New Application</a>
     {% endif %}
 
     <table border="1">

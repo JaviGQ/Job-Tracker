@@ -5,10 +5,11 @@
 <body>
     <div class="page-header">
         <h1>Contacts</h1>
-        {% if mode == 'list' %}
-        <a href="/contacts/add" class="btn btn-primary">+ Add Contact</a>
-        {% endif %}
     </div>
+
+    {% if mode == 'list' %}
+    <a href="/contacts/add" class="btn btn-primary">+ Add Contact</a>
+    {% endif %}
 
     <!-- ADD / EDIT FORM SECTION  -->
     {% if mode == 'add' or mode == 'edit' %}

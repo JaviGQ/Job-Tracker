@@ -6,31 +6,37 @@
 </head>
 <body>
 
-    <!-- NAVIGATION BAR           -->
-    <nav>
-        <div class="nav-brand">
-            <p>Job Tracker</p>
-        </div>
-        <div class="nav-links">
-            <a href="/">Dashboard</a>
-            <a href="/companies">Companies</a>
-            <a href="/jobs">Jobs</a>
-            <a href="/applications">Applications</a>
-            <a href="/contacts">Contacts</a>
-            <a href="/job_match">Job Match</a>
-        </div>
-    </nav>
+    <div class="app-container">
 
-    <!-- MAIN CONTENT AREA        -->
-    <main>
-        {% block content %}
-        {% endblock %}
-    </main>
+        <!-- SIDE NAVIGATION          -->
+        <nav class="sidebar">
+            <div class="sidebar-brand">
+                <a href="/">🗂 Job Tracker</a>
+            </div>
+            <div class="sidebar-links">
+                <a href="/">📊 Dashboard</a>
+                <a href="/companies">🏢 Companies</a>
+                <a href="/jobs">💼 Jobs</a>
+                <a href="/applications">📋 Applications</a>
+                <a href="/contacts">👤 Contacts</a>
+                <a href="/job_match">🎯 Job Match</a>
+            </div>
+        </nav>
 
-    <!-- FOOTER                   -->
-    <footer>
-        <p>Job Application Tracker</p>
-    </footer>
+        <!-- MAIN CONTENT AREA        -->
+        <div class="main-wrapper">
+            <main>
+                {% block content %}
+                {% endblock %}
+            </main>
+
+            <!-- FOOTER                   -->
+            <footer>
+                <p>Job Application Tracker</p>
+            </footer>
+        </div>
+
+    </div>
 
 </body>
 </html>
