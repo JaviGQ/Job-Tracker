@@ -1,6 +1,7 @@
 # Job Application Tracker
 
-A full-stack web application for tracking job applications, built with MySQL, Python/Flask, and HTML/CSS.
+A full-stack web application for tracking job applications, built with 
+MySQL, Python/Flask, and HTML/CSS.
 
 ## Features
 
@@ -13,18 +14,33 @@ A full-stack web application for tracking job applications, built with MySQL, Py
 
 ## Technologies Used
 
-- **Database:** MySQL
+- **Database:** MySQL 8.0
 - **Backend:** Python 3 / Flask
 - **Frontend:** HTML, CSS, Chart.js
 - **Version Control:** GitHub
 
+---
+
 ## Prerequisites
 
-Before running this application make sure you have the following installed:
+### Windows
+- Python 3.x — https://www.python.org/downloads/
+- MySQL Server 8.0 — https://dev.mysql.com/downloads/mysql/
+- MySQL Workbench (recommended) — https://dev.mysql.com/downloads/workbench/
+- Git Bash — https://git-scm.com/downloads
 
-- Python 3.x
-- MySQL Server
-- pip
+### Linux (Ubuntu/Debian)
+- Python 3 and pip
+- python3-venv and python3-full
+- MySQL Server 8.0
+
+Install all Linux prerequisites with:
+```bash
+sudo apt update
+sudo apt install python3 python3-pip python3-full python3-venv mysql-server
+```
+
+---
 
 ## Setup Instructions
 
@@ -34,43 +50,125 @@ git clone <your-repo-url>
 cd job_tracker
 ```
 
-### 2. Install Dependencies
+---
+
+### 2. Set Up a Virtual Environment
+
+#### Windows (Git Bash)
+```bash
+python -m venv venv
+source venv/Scripts/activate
+```
+
+#### Linux / Mac
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+You will know the virtual environment is active when you see `(venv)` 
+at the start of your terminal prompt.
+
+---
+
+### 3. Install Dependencies
+
+With your virtual environment active:
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Set Up the Database
+---
 
-Log into MySQL and run the schema file:
+### 4. Set Up MySQL
+
+#### Windows
+- Open the Services panel (`Win + R` → type `services.msc`)
+- Find **MySQL80** and make sure it is **Running**
+- If not, right click it and select **Start**
+
+#### Linux (Ubuntu)
+Start the MySQL service:
+```bash
+sudo service mysql start
+```
+
+Enable it to start automatically on boot:
+```bash
+sudo systemctl enable mysql
+```
+
+---
+
+### 5. Initialize the Database
+
+#### Windows (Git Bash) or Linux
+Navigate to your project folder and run:
 ```bash
 mysql -u root -p < schema.sql
 ```
 
-Or open MySQL Workbench, open `schema.sql`, and execute it.
+#### Alternative — MySQL Workbench
+1. Open MySQL Workbench and connect to your local server
+2. Click **File → Open SQL Script** and select `schema.sql`
+3. Click the lightning bolt ⚡ button to execute
+4. Confirm all 4 tables were created under the `job_tracker` database
 
-### 4. Configure Database Credentials
+#### Verify the Database Was Created
+```bash
+mysql -u root -p -e "USE job_tracker; SHOW TABLES;"
+```
 
-Open `database.py` and update the connection details with your MySQL credentials:
+You should see all four tables listed:
+```
++-----------------------+
+| Tables_in_job_tracker |
++-----------------------+
+| applications          |
+| companies             |
+| contacts              |
+| jobs                  |
++-----------------------+
+```
+
+---
+
+### 6. Configure Database Credentials
+
+Open `database.py` and update the connection details with your 
+MySQL credentials:
 ```python
 def get_db():
     connection = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="YOUR_PASSWORD_HERE",
+        password="YOUR_PASSWORD_HERE",  # add your MySQL password here
         database="job_tracker"
     )
     return connection
 ```
 
-### 5. Run the Application
+---
+
+### 7. Run the Application
+
+Make sure your virtual environment is active (you should see `(venv)` 
+in your prompt), then run:
 ```bash
 python app.py
+```
+
+On Linux you may need:
+```bash
+python3 app.py
 ```
 
 Then open your browser and navigate to:
 ```
 http://localhost:5000
 ```
+
+---
 
 ## Project Structure
 ```
@@ -97,7 +195,7 @@ job_tracker/
 
 The application uses four related tables:
 
-- **companies** — Company information
-- **jobs** — Job postings linked to companies
-- **applications** — Application records linked to jobs
+- **companies** — Company information including industry and location
+- **jobs** — Job postings linked to companies with requirements stored as JSON
+- **applications** — Application records linked to jobs with status tracking
 - **contacts** — Contact people linked to companies
