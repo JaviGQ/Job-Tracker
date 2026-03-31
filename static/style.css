@@ -317,7 +317,43 @@ button, .btn {
 .badge-interview   { background: #1a3a2e; color: #6ee7b7; }
 .badge-offer       { background: #14532d; color: #86efac; }
 .badge-rejected    { background: #450a0a; color: #fca5a5; }
-.badge-withdrawn   { background: #27272a; color: #a1a1aa; }
+.badge-withdrawn   { background: #52525b; color: #f4f4f5; }
+
+/* ========================
+   DASHBOARD STATUS SECTION
+======================== */
+.status-section {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    background: #27272a;
+    border-radius: 10px;
+    border: 0.5px solid #3f3f46;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.status-table-wrap {
+    flex: 1;
+}
+
+.status-table-wrap table {
+    margin: 0;
+    box-shadow: none;
+    border: none;
+    background: transparent;
+}
+
+.status-table-wrap thead {
+    background-color: #1c1c1e;
+}
+
+.status-chart-wrap {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
 /* ========================
    JOB MATCH

@@ -29,26 +29,38 @@
 <!-- Status Breakdown -->
 <h2>Applications by Status</h2>
 {% if status_breakdown %}
-<table>
-    <thead>
-        <tr>
-            <th>Status</th>
-            <th>Count</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for row in status_breakdown %}
-        <tr>
-            <td>
-                <span class="badge badge-{{ row.status | lower }}">
-                    {{ row.status }}
-                </span>
-            </td>
-            <td>{{ row.count }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="status-section">
+    
+    <!-- Left side: table -->
+    <div class="status-table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in status_breakdown %}
+                <tr>
+                    <td>
+                        <span class="badge badge-{{ row.status | lower }}">
+                            {{ row.status }}
+                        </span>
+                    </td>
+                    <td>{{ row.count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Right side: doughnut chart -->
+    <div class="status-chart-wrap">
+        <canvas id="statusChart" width="280" height="280"></canvas>
+    </div>
+
+</div>
 {% else %}
 <div class="empty-message">No applications yet.</div>
 {% endif %}
@@ -83,5 +95,52 @@
 {% else %}
 <div class="empty-message">No applications yet.</div>
 {% endif %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+    const statusData = {
+        labels: [{% for row in status_breakdown %}'{{ row.status }}'{% if not loop.last %},{% endif %}{% endfor %}],
+        datasets: [{
+            data: [{% for row in status_breakdown %}{{ row.count }}{% if not loop.last %},{% endif %}{% endfor %}],
+            backgroundColor: [
+                '#1e3a5f',  // Applied - blue
+                '#3d2e00',  // Screening - amber
+                '#1a3a2e',  // Interview - teal
+                '#14532d',  // Offer - green
+                '#450a0a',  // Rejected - red
+                '#52525b'   // Withdrawn - gray
+            ],
+            borderColor: [
+                '#93c5fd',
+                '#fcd34d',
+                '#6ee7b7',
+                '#86efac',
+                '#fca5a5',
+                '#d4d4d8'
+            ],
+            borderWidth: 2
+        }]
+    };
+
+    new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: statusData,
+        options: {
+            responsive: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.parsed + ' application(s)';
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
 
 {% endblock %}

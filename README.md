@@ -12,6 +12,18 @@ MySQL, Python/Flask, and HTML/CSS.
 - **Contacts** — Store recruiter and hiring manager contact information
 - **Job Match** — Enter your skills and get ranked job matches by compatibility
 
+## Demo Video
+
+A full walkthrough of the application including the database can be viewed here:
+
+▶️ [Watch the Demo on YouTube](https://youtu.be/fdHY2NEbd98)
+
+The video covers:
+- Dashboard overview and statistics
+- Companies, Jobs, Applications, and Contacts CRUD functionality
+- Job Match feature with skill-based matching
+- Database interaction via MySQL
+
 ## Technologies Used
 
 - **Database:** MySQL 8.0

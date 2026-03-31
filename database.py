@@ -5,7 +5,7 @@ def get_db():
     connection = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="YOUR_PASSWORD_HERE",
+        password="root",
         database="job_tracker"
     )
     return connection
